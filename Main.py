@@ -14,7 +14,7 @@ def printBoard( start):
         print()
     return board
 
-def placeMove(number,board):
+def placeMove(number):
     rowNum = number //3
     colNum = number % 3
     if colNum == 0:
@@ -22,18 +22,54 @@ def placeMove(number,board):
         colNum = 2
     else:
         colNum -= 1
-    board[rowNum][colNum] = 'X'
-    start = False
-    printBoard(start)
+    if valid(board, rowNum,colNum):
+        board[rowNum][colNum] = 'X'
+        start = False
+        printBoard(start)
+        computerMove()
+    else:
+        print("Invalid move. Please choose again")
+        userInput()
 
-def userInput(board):
+def userInput():
     userNum = input(" \nYou are player X please make your first move by typing in the number of the spot you wish to move into \n")
-    placeMove(int(userNum),board)
+    placeMove(int(userNum))
+
+def valid(lboard, rowNum, colNum):
+    if lboard[rowNum][colNum] != 'X' and lboard[rowNum][colNum] != 'O':
+        return True
+    else:
+        return False
+
+
+def computerMove():
+    openSpots = 8
+    localBoard = board
+
+    if openSpots == 0:
+        #Return max points list
+        a = 2
+    else:
+        print('\n \n \n \n ')
+        for localRow in range(0,3):
+            for localCol in range(0,3):
+                if valid(localBoard, localRow,localCol):
+                    localBoard[localRow][localCol] = 'O'
+                        #CALL MINIMAX AGAIN
+                    print(localBoard[localRow][localCol], "   ", end=" ")
+                else:
+                    print(localBoard[localRow][localCol], "   ", end=" ")
+
+            print()
+
+
+
+
 
 def main():
     start = True
     board = printBoard(start)
-    userInput(board)
+    userInput()
 
 
 

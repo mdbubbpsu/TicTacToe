@@ -37,7 +37,8 @@ class ticTacToe(object):
                 move = int(input("Please enter which spot you would like to move in: "))
                 if self.valid(dict[move][0], dict[move][1]):
                     self.performMove(dict[move][0], dict[move][1], 'X')
-                print(self.get_best_move(self.board))
+                print(self.getBoard())
+                print(self.get_best_move(self))
                 break
 
 
@@ -180,66 +181,79 @@ class ticTacToe(object):
                 if copyBoard.performMove2(i, j, turn):
                     yield (i, j), copyBoard
     def draw(self, board):
-        return any([0-9] in subList for subList in board.getBoard())
+        count = 1
+        boardRep = board.getBoard()
+        for i in range(self.x):
+            for j in range(self.y):
+                if boardRep[i][j] == count:
+                    return False
+                count += 1
+        return True
 
     def get_best_move(self, board):
-        startBoard = self
+        startBoard = board
         alpha = -1000
         beta = 1000
         value, move = self.maxValue(startBoard, alpha, beta)
         return value, move
 
+
+# Current problem: something messed up with the pruning. not taking 1 as max when o wins
+
+
     def maxValue(self, board, alpha, beta):
         boo, turn = board.solved()
-        util = 0
-        if boo:
-            if turn == 'X':
-                util = -1
-            elif turn == 'O':
-                util = 1
-            return util, None
-        elif self.draw(board):
+        if self.draw(board):
+            print("TIE from min", board.getBoard())
             return 0, None
+        elif boo:
+            print("X Wins from min", board.getBoard())
+            return -1, None
         localMax = -1000
-        returnIndex = (0, 0)
+        returnIndex = (None, None)
+        print("Parent - X: ", board.getBoard())
         for ind, newBoard in board.successors2('O'):
-            v2, a2 = self.minValue(newBoard, alpha, beta)
-            if v2 > localMax:
-                localMax, returnIndex = v2, ind
+            print("Child - O", newBoard.getBoard())
+            childScore, a2 = self.minValue(newBoard, alpha, beta)
+            print( "beta", beta)
+            if childScore > localMax:
+                localMax, returnIndex = childScore, ind
                 alpha = max(alpha, localMax)
             if localMax >= beta:
                 return localMax, ind
         return localMax, returnIndex
 
-
     def minValue(self, board, alpha, beta):
         boo, turn = board.solved()
-        util = 0
-        if boo:
-            if turn == 'X':
-                util = 1
-            elif turn == 'O':
-                util = -1
-            return util, None
-        elif self.draw(board):
+        if self.draw(board):
+            print("TIE from max", board.getBoard())
             return 0, None
+        elif boo:
+            db = board.getBoard()
+            print("O Wins from max", board.getBoard())
+            print("alpha", alpha, "beta", beta)
+            return 1, None
+
         localMin = 1000
         returnIndex = (0, 0)
         for ind, newBoard in board.successors2('X'):
+
             v2, a2 = self.maxValue(newBoard, alpha, beta)
+            print(v2, localMin, "alpha", alpha)
             if v2 < localMin:
                 localMin, returnIndex = v2, ind
-
-                beta = min(alpha, localMin)
+                beta = min(beta, localMin)
+            print(v2, localMin, alpha)
             if localMin <= alpha:
                 return localMin, ind
         return localMin, returnIndex
 
 
 b = createBoard(3, 3)
+c = ticTacToe([['X', 2, 3], [4, 5, 6], [7, 8, 9]])
 #b.start()
 #b.displayBoard(b.getBoard())
-print(b.get_best_move(b))
+print(c.get_best_move(c))
 
 
 

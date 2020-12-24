@@ -14,11 +14,32 @@ def createBoard(rows, cols):
 
 
 class ticTacToe(object):
-
     def __init__(self, board):
         self.board = board
         self.x = len(board)
         self.y = len(board[0])
+
+    def start(self):
+        i = 0
+        boo, val = self.solved()
+        dict = {}
+        count = 1
+        for i in range(self.x):
+            for j in range(self.y):
+                dict[count] = (i,j)
+                count += 1
+
+        print(dict)
+        while not boo:
+            print(234)
+            if i % 2 == 0:
+                self.displayBoard(self.getBoard())
+                move = int(input("Please enter which spot you would like to move in: "))
+                if self.valid(dict[move][0], dict[move][1]):
+                    self.performMove(dict[move][0], dict[move][1], 'X')
+                print(self.get_best_move(self.board))
+                break
+
 
     def getBoard(self):
         return self.board
@@ -144,12 +165,31 @@ class ticTacToe(object):
                 if copyBoard.performMove(i, j, turn):
                     yield (i, j), copyBoard
 
+    def performMove2(self, row, col, turn):
+        if self.valid(row, col):
+            self.board[row][col] = turn
+            return True
+        else:
+
+            return False
+
+    def successors2(self, turn):
+        for i in range(self.x):
+            for j in range(self.y):
+                copyBoard = self.copy()
+                if copyBoard.performMove2(i, j, turn):
+                    yield (i, j), copyBoard
+    def draw(self, board):
+        return any([0-9] in subList for subList in board.getBoard())
+
     def get_best_move(self, board):
         startBoard = self
-        value, move = self.maxValue(startBoard)
+        alpha = -1000
+        beta = 1000
+        value, move = self.maxValue(startBoard, alpha, beta)
         return value, move
 
-    def maxValue(self, board):
+    def maxValue(self, board, alpha, beta):
         boo, turn = board.solved()
         util = 0
         if boo:
@@ -158,16 +198,21 @@ class ticTacToe(object):
             elif turn == 'O':
                 util = 1
             return util, None
-        v = -1000
+        elif self.draw(board):
+            return 0, None
+        localMax = -1000
         returnIndex = (0, 0)
-        for ind, newBoard in board.successors('O'):
-            v2, a2 = self.minValue(newBoard)
-            if v2 > v:
-                v, returnIndex = v2, ind
-        return v, returnIndex
+        for ind, newBoard in board.successors2('O'):
+            v2, a2 = self.minValue(newBoard, alpha, beta)
+            if v2 > localMax:
+                localMax, returnIndex = v2, ind
+                alpha = max(alpha, localMax)
+            if localMax >= beta:
+                return localMax, ind
+        return localMax, returnIndex
 
 
-    def minValue(self, board):
+    def minValue(self, board, alpha, beta):
         boo, turn = board.solved()
         util = 0
         if boo:
@@ -176,16 +221,23 @@ class ticTacToe(object):
             elif turn == 'O':
                 util = -1
             return util, None
-        v = 1000
+        elif self.draw(board):
+            return 0, None
+        localMin = 1000
         returnIndex = (0, 0)
-        for ind, newBoard in board.successors('X'):
-            v2, a2 = self.maxValue(newBoard)
-            if v2 < v:
-                v, returnIndex = v2, ind
-        return v, returnIndex
+        for ind, newBoard in board.successors2('X'):
+            v2, a2 = self.maxValue(newBoard, alpha, beta)
+            if v2 < localMin:
+                localMin, returnIndex = v2, ind
+
+                beta = min(alpha, localMin)
+            if localMin <= alpha:
+                return localMin, ind
+        return localMin, returnIndex
 
 
-b = createBoard(3,3)
+b = createBoard(3, 3)
+#b.start()
 #b.displayBoard(b.getBoard())
 print(b.get_best_move(b))
 

@@ -1,4 +1,5 @@
 import copy
+from collections import defaultdict
 
 def createBoard(rows, cols):
     board = [[False for i in range(cols)] for j in range(rows)]
@@ -18,10 +19,11 @@ class ticTacToe(object):
         self.board = board
         self.x = len(board)
         self.y = len(board[0])
+        self.scoresDict = {}
 
     def start(self):
         i = 0
-        boo, val = self.solved()
+
         dict = {}
         count = 1
         for i in range(self.x):
@@ -29,115 +31,116 @@ class ticTacToe(object):
                 dict[count] = (i,j)
                 count += 1
 
-        print(dict)
-        while not boo:
+        while self.solved():
             print(234)
             if i % 2 == 0:
-                self.displayBoard(self.getBoard())
+                self.displayBoard()
                 move = int(input("Please enter which spot you would like to move in: "))
                 if self.valid(dict[move][0], dict[move][1]):
                     self.performMove(dict[move][0], dict[move][1], 'X')
                 print(self.getBoard())
-                print(self.get_best_move(self))
-                break
+                util, move = self.get_best_move()
+                if move is not None:
+                    print(util, move)
+                    self.performMove2(move[0], move[1], 'O')
+                    if not self.solved():
+                        print("O wins")
+                        print(self.displayBoard())
+                        break
+                    print(self.displayBoard())
+                else:
+                    print("GAME OVER")
+                    break
+
+                i += 2
+
 
 
     def getBoard(self):
         return self.board
 
     def solved(self):
-        db = self.board
-        one = [self.board[0][0], self.board[1][0], self.board[2][0]]
-        two = [self.board[0][1], self.board[1][1], self.board[2][1]]
-        three = [self.board[0][2], self.board[1][2], self.board[2][2]]
+        board = self.getBoard()
+        one = [board[0][0], board[1][0], board[2][0]]
+        two = [board[0][1], board[1][1], board[2][1]]
+        three = [board[0][2], board[1][2], board[2][2]]
 
-        four = [self.board[0][0], self.board[0][1], self.board[0][2]]
-        five = [self.board[1][0], self.board[1][1], self.board[1][2]]
-        six = [self.board[2][0], self.board[2][1], self.board[2][2]]
+        four = [board[0][0], board[0][1], board[0][2]]
+        five = [board[1][0], board[1][1], board[1][2]]
+        six = [board[2][0], board[2][1], board[2][2]]
 
-        seven = [self.board[0][0], self.board[1][1], self.board[2][2]]
-        eight = [self.board[0][2], self.board[1][1], self.board[2][0]]
+        seven = [board[0][0], board[1][1], board[2][2]]
+        eight = [board[0][2], board[1][1], board[2][0]]
         # First column
-        if self.board[0][0] != 1 and self.board[1][0] != 4 and self.board[2][0] != 7:
-            if all(i == 'X' for i in one):
+        if board[0][0] != 1 and board[1][0] != 4 and board[2][0] != 7:
+
+            if all(i == one[0] for i in one) and one[0] == 'X':
                 return True, 'X'
-            elif all(i == 'O' for i in one):
+            elif all(i == one[0] for i in one) and one[0] == 'O':
                 return True, 'O'
-            else:
-                return False, -1
+
 
         # Second column
-        elif self.board[0][1] != 2 and self.board[1][1] != 5 and self.board[2][1] != 8:
-            if all(i == 'X' for i in two):
+        if board[0][1] != 2 and board[1][1] != 5 and board[2][1] != 8:
+            if all(i == two[0] for i in two) and two[0] == 'X':
                 return True, 'X'
-            elif all(i == 'O' for i in two):
+            elif all(i == two[0] for i in two) and two[0] == 'O':
                 return True, 'O'
-            else:
-                return False, -1
 
         # Third Column
-        elif self.board[0][2] != 3 and self.board[1][2] != 6 and self.board[2][2] != 9:
-            if all(i == 'X' for i in three):
+        if board[0][2] != 3 and board[1][2] != 6 and board[2][2] != 9:
+            if all(i == three[0] for i in three)  and three[0] == 'X':
                 return True, 'X'
-            elif all(i == 'O' for i in three):
+            elif all(i == three[0] for i in three)  and three[0] == 'O':
                 return True, 'O'
-            else:
-                return False, -1
+
 
         # First Row
-        elif self.board[0][0] != 1 and self.board[0][1] != 2 and self.board[0][2] != 3:
-            if all(i == 'X' for i in four):
+        if board[0][0] != 1 and board[0][1] != 2 and board[0][2] != 3:
+            if all(i == four[0] for i in four) and four[0] == 'X':
                 return True, 'X'
-            elif all(i == 'O' for i in four):
+            elif all(i == four[0] for i in four) and four[0] == 'O':
                 return True, 'O'
-            else:
-                return False, -1
 
         # Second Row
-        elif self.board[1][0] != 4 and self.board[1][1] != 5 and self.board[1][2] != 6:
-            if all(i == 'X' for i in five):
+        if board[1][0] != 4 and board[1][1] != 5 and board[1][2] != 6:
+            if all(i == five[0] for i in five) and five[0] == 'X':
                 return True, 'X'
-            elif all(i == 'O' for i in five):
+            elif all(i == five[0] for i in five) and five[0] == 'O':
                 return True, 'O'
-            else:
-                return False, -1
+
 
         # Third Row
-        elif self.board[2][0] != 7 and self.board[2][1] != 8 and self.board[2][2] != 9:
-            if all(i == 'X' for i in six):
+        if board[2][0] != 7 and board[2][1] != 8 and board[2][2] != 9:
+            if all(i == six[0] for i in six) and six[0] == 'X':
                 return True, 'X'
-            elif all(i == 'O' for i in six):
+            elif all(i == six[0] for i in six) and six[0] == 'O':
                 return True, 'O'
-            else:
-                return False, -1
+
 
         # First diagonal
-        elif self.board[0][0] != 1 and self.board[1][1] != 5 and self.board[2][2] != 9:
-            if all(i == 'X' for i in seven):
+        if board[0][0] != 1 and board[1][1] != 5 and board[2][2] != 9:
+            if all(i == seven[0] for i in seven) and seven[0] == 'X':
                 return True, 'X'
-            elif all(i == 'O' for i in seven):
+            elif all(i == seven[0] for i in seven) and seven[0] == 'O':
                 return True, 'O'
-            else:
-                return False, -1
+
 
         # Second diagonal
-        elif self.board[0][2] != 3 and self.board[1][1] != 5 and self.board[2][0] != 7:
-            if all(i == 'X' for i in eight):
+        if board[0][2] != 3 and board[1][1] != 5 and board[2][0] != 7:
+            if all(i == eight[0]  for i in eight) and eight[0] == 'X':
                 return True, 'X'
-            elif all(i == 'O' for i in eight):
+            elif all(i == eight[0] for i in eight) and eight[0] == 'O':
                 return True, 'O'
-            else:
-                return False, -1
-        else:
-            return False, -1
+        return False, -1
 
-    def displayBoard(self, board):
+    def displayBoard(self):
         for i in range(self.x):
             for j in range(self.y):
                 if j == 0:
-                    print("|", board[i][j], " | ", end="")
+                    print("|", self.getBoard()[i][j], " | ", end="")
                 else:
-                    print(board[i][j], " | ", end="")
+                    print(self.getBoard()[i][j], " | ", end="")
             print()
 
     def valid(self, row, col):
@@ -149,11 +152,11 @@ class ticTacToe(object):
     def performMove(self, row, col, turn):
         if self.valid(row, col):
             self.board[row][col] = turn
-            self.displayBoard(self.board)
+            self.displayBoard()
             return True
         else:
             print("INVALID MOVE, PLEASE TRY AGAIN")
-            self.displayBoard(self.board)
+            self.displayBoard()
             return False
 
     def copy(self):
@@ -171,7 +174,6 @@ class ticTacToe(object):
             self.board[row][col] = turn
             return True
         else:
-
             return False
 
     def successors2(self, turn):
@@ -180,80 +182,79 @@ class ticTacToe(object):
                 copyBoard = self.copy()
                 if copyBoard.performMove2(i, j, turn):
                     yield (i, j), copyBoard
-    def draw(self, board):
+    def draw(self):
         count = 1
-        boardRep = board.getBoard()
+        boardRep = self.getBoard()
+        falseLst = 0
         for i in range(self.x):
             for j in range(self.y):
-                if boardRep[i][j] == count:
-                    return False
+                if boardRep[i][j] != count:
+                    falseLst += 1
                 count += 1
-        return True
 
-    def get_best_move(self, board):
-        startBoard = board
-        alpha = -1000
-        beta = 1000
-        value, move = self.maxValue(startBoard, alpha, beta)
+        return falseLst == 9
+
+    def get_best_move(self):
+        board = self.getBoard()
+        visited = []
+        value, move = self.maxValue(visited, -1000, 1000, 0)
         return value, move
 
 
 # Current problem: something messed up with the pruning. not taking 1 as max when o wins
 
 
-    def maxValue(self, board, alpha, beta):
-        boo, turn = board.solved()
-        if self.draw(board):
-            print("TIE from min", board.getBoard())
+    def maxValue(self, visited, alpha, beta, depth):
+        boo, turn = self.solved()
+        if self.draw() and not boo:
             return 0, None
         elif boo:
-            print("X Wins from min", board.getBoard())
             return -1, None
-        localMax = -1000
+        v = -1000
         returnIndex = (None, None)
-        print("Parent - X: ", board.getBoard())
-        for ind, newBoard in board.successors2('O'):
-            print("Child - O", newBoard.getBoard())
-            childScore, a2 = self.minValue(newBoard, alpha, beta)
-            print( "beta", beta)
-            if childScore > localMax:
-                localMax, returnIndex = childScore, ind
-                alpha = max(alpha, localMax)
-            if localMax >= beta:
-                return localMax, ind
-        return localMax, returnIndex
+        for ind, newBoard in self.successors2('O'):
+            v2, a2 = newBoard.minValue(visited, alpha, beta, depth + 1)
+            if v2 > v:
+                v, returnIndex = v2, ind
+                alpha = max(alpha, v)
+            print("     max value at depth", depth, "for child", newBoard.getBoard(), " is ", v, "")
+            if v >= beta:
+                return v, returnIndex
 
-    def minValue(self, board, alpha, beta):
-        boo, turn = board.solved()
-        if self.draw(board):
-            print("TIE from max", board.getBoard())
+        print("Max value at depth", depth, "for parent" ,self.getBoard(),"is", v, returnIndex, alpha)
+
+        return v, returnIndex
+
+    def minValue(self, visited, alpha, beta, depth):
+        boo, turn = self.solved()
+        if self.draw() and not boo:
             return 0, None
         elif boo:
-            db = board.getBoard()
-            print("O Wins from max", board.getBoard())
-            print("alpha", alpha, "beta", beta)
             return 1, None
-
-        localMin = 1000
+        v = 1000
         returnIndex = (0, 0)
-        for ind, newBoard in board.successors2('X'):
+        for ind, newBoard in self.successors2('X'):
+            v2, a2 = newBoard.maxValue(visited, alpha, beta, depth + 1)
+            if v2 < v:
+                v, returnIndex = v2, ind
+                beta = min(beta, v)
+            print("     min value at depth", depth, "for child", newBoard.getBoard(), " is ", v, "")
+            if v <= alpha:
+                return v, returnIndex
+        print("Overall Min value at depth", depth, "for parent" ,self.getBoard(),"is", v, returnIndex, beta)
+        return v, returnIndex
 
-            v2, a2 = self.maxValue(newBoard, alpha, beta)
-            print(v2, localMin, "alpha", alpha)
-            if v2 < localMin:
-                localMin, returnIndex = v2, ind
-                beta = min(beta, localMin)
-            print(v2, localMin, alpha)
-            if localMin <= alpha:
-                return localMin, ind
-        return localMin, returnIndex
 
+b = createBoard(2,2)
+c = ticTacToe([[1, 2, 3], [4, 5, 6], [7,8,9]])
+d = ticTacToe([['X', 'X', 'O'], ['O', 'X', 6], [7,8,9]])
+e = ticTacToe([[1, 2,3], [4,5,6], [7,8,9]])
 
-b = createBoard(3, 3)
-c = ticTacToe([['X', 2, 3], [4, 5, 6], [7, 8, 9]])
-#b.start()
-#b.displayBoard(b.getBoard())
-print(c.get_best_move(c))
+#c.displayBoard(c.getBoard())
+e.start()
+#e.displayBoard()
+#print(e.get_best_move())
+#print(e.scoresDict.items())
 
 
 

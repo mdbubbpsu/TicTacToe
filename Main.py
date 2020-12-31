@@ -1,5 +1,4 @@
 import copy
-from collections import defaultdict
 
 def createBoard(rows, cols):
     board = [[False for i in range(cols)] for j in range(rows)]
@@ -25,35 +24,34 @@ class ticTacToe(object):
         i = 0
 
         dict = {}
+        compDict = {}
         count = 1
         for i in range(self.x):
             for j in range(self.y):
                 dict[count] = (i,j)
+                compDict[(i,j)] = count
                 count += 1
 
-        while self.solved():
-            print(234)
-            if i % 2 == 0:
+        while not self.solved()[0]:
+            self.displayBoard()
+            move = int(input("Please enter which spot you would like to move in: "))
+            valid = self.valid(dict[move][0], dict[move][1])
+            while not valid:
                 self.displayBoard()
-                move = int(input("Please enter which spot you would like to move in: "))
-                if self.valid(dict[move][0], dict[move][1]):
-                    self.performMove(dict[move][0], dict[move][1], 'X')
-                print(self.getBoard())
-                util, move = self.get_best_move()
-                if move is not None:
-                    print(util, move)
-                    self.performMove2(move[0], move[1], 'O')
-                    if not self.solved():
-                        print("O wins")
-                        print(self.displayBoard())
-                        break
-                    print(self.displayBoard())
-                else:
-                    print("GAME OVER")
+                move = int(input("Invalid move please pick again: "))
+                valid = self.valid(dict[move][0], dict[move][1])
+            self.performMove(dict[move][0], dict[move][1], 'X')
+            util, move = self.get_best_move()
+            if move is not None:
+                self.performMove2(move[0], move[1], 'O')
+                print("Computer moved into spot: ",compDict[move])
+                if self.solved()[0]:
+                    print("GAME OVER, O wins")
+                    self.displayBoard()
                     break
-
-                i += 2
-
+            else:
+                print("GAME OVER, it's a tie!")
+                break
 
 
     def getBoard(self):
@@ -144,20 +142,13 @@ class ticTacToe(object):
             print()
 
     def valid(self, row, col):
-        if self.board[row][col] != 'X' and self.board[row][col] != 'O':
-            return True
-        else:
-            return False
+        return type(self.board[row][col]) == int
+
 
     def performMove(self, row, col, turn):
-        if self.valid(row, col):
-            self.board[row][col] = turn
-            self.displayBoard()
-            return True
-        else:
-            print("INVALID MOVE, PLEASE TRY AGAIN")
-            self.displayBoard()
-            return False
+        self.board[row][col] = turn
+        self.displayBoard()
+
 
     def copy(self):
         return ticTacToe(copy.deepcopy(self.board))
@@ -201,29 +192,26 @@ class ticTacToe(object):
         return value, move
 
 
-# Current problem: something messed up with the pruning. not taking 1 as max when o wins
-
-
     def maxValue(self, visited, alpha, beta, depth):
         boo, turn = self.solved()
         if self.draw() and not boo:
             return 0, None
         elif boo:
             return -1, None
-        v = -1000
+        localMax = -1000
         returnIndex = (None, None)
         for ind, newBoard in self.successors2('O'):
-            v2, a2 = newBoard.minValue(visited, alpha, beta, depth + 1)
-            if v2 > v:
-                v, returnIndex = v2, ind
-                alpha = max(alpha, v)
-            print("     max value at depth", depth, "for child", newBoard.getBoard(), " is ", v, "")
-            if v >= beta:
-                return v, returnIndex
+            childScore, a2 = newBoard.minValue(visited, alpha, beta, depth + 1)
+            if childScore > localMax:
+                localMax, returnIndex = childScore, ind
+                alpha = max(alpha, childScore)
+            #print("     max value at depth", depth, "for child", newBoard.getBoard(), " is ", localMax, "")
+            if localMax >= beta:
+                return localMax, returnIndex
 
-        print("Max value at depth", depth, "for parent" ,self.getBoard(),"is", v, returnIndex, alpha)
+        #print("Max value at depth", depth, "for parent" ,self.getBoard(),"is", localMax, returnIndex, alpha)
 
-        return v, returnIndex
+        return localMax, returnIndex
 
     def minValue(self, visited, alpha, beta, depth):
         boo, turn = self.solved()
@@ -231,22 +219,22 @@ class ticTacToe(object):
             return 0, None
         elif boo:
             return 1, None
-        v = 1000
+        localMin = 1000
         returnIndex = (0, 0)
         for ind, newBoard in self.successors2('X'):
-            v2, a2 = newBoard.maxValue(visited, alpha, beta, depth + 1)
-            if v2 < v:
-                v, returnIndex = v2, ind
-                beta = min(beta, v)
-            print("     min value at depth", depth, "for child", newBoard.getBoard(), " is ", v, "")
-            if v <= alpha:
-                return v, returnIndex
-        print("Overall Min value at depth", depth, "for parent" ,self.getBoard(),"is", v, returnIndex, beta)
-        return v, returnIndex
+            childScore, a2 = newBoard.maxValue(visited, alpha, beta, depth + 1)
+            if childScore < localMin:
+                localMin, returnIndex = childScore, ind
+                beta = min(beta, localMin)
+            #print("     min value at depth", depth, "for child", newBoard.getBoard(), " is ", localMin, "")
+            if localMin <= alpha:
+                return localMin, returnIndex
+        #print("Overall Min value at depth", depth, "for parent" ,self.getBoard(),"is", localMin, returnIndex, beta)
+        return localMin, returnIndex
 
 
 b = createBoard(2,2)
-c = ticTacToe([[1, 2, 3], [4, 5, 6], [7,8,9]])
+c = ticTacToe([['X', 2, 3], [4, 5, 6], [7,8,9]])
 d = ticTacToe([['X', 'X', 'O'], ['O', 'X', 6], [7,8,9]])
 e = ticTacToe([[1, 2,3], [4,5,6], [7,8,9]])
 
